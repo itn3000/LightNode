@@ -20,7 +20,7 @@ namespace LightNode.Formatter
 
         public override void Serialize(Stream stream, object obj)
         {
-            var json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(obj);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
             var data = this.Encoding.GetBytes(json);
             stream.Write(data, 0, data.Length);
         }
@@ -29,7 +29,7 @@ namespace LightNode.Formatter
         {
             using (var sr = new StreamReader(stream, this.Encoding))
             {
-                return new System.Web.Script.Serialization.JavaScriptSerializer().Deserialize(sr.ReadToEnd(), type);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject(sr.ReadToEnd(), type);
             }
         }
     }
@@ -65,7 +65,7 @@ namespace LightNode.Formatter
 
         public override void Serialize(Stream stream, object obj)
         {
-            var json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(obj);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
             var data = this.Encoding.GetBytes(json);
             using (var gzip = new System.IO.Compression.GZipStream(stream, System.IO.Compression.CompressionLevel.Fastest))
             {
@@ -78,7 +78,7 @@ namespace LightNode.Formatter
             using (var gzip = new System.IO.Compression.GZipStream(stream, System.IO.Compression.CompressionMode.Decompress))
             using (var sr = new StreamReader(gzip, this.Encoding))
             {
-                return new System.Web.Script.Serialization.JavaScriptSerializer().Deserialize(sr.ReadToEnd(), type);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject(sr.ReadToEnd(), type);
             }
         }
     }

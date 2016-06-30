@@ -13,7 +13,7 @@ namespace LightNode.Server
 
     public class RegisteredHandlersInfo
     {
-        public string EngineId { get;private set; }
+        public string EngineId { get; private set; }
         public ILightNodeOptions Options { get; private set; }
         public IReadOnlyCollection<KeyValuePair<string, OperationInfo>> RegisteredHandlers { get; private set; }
 
@@ -44,7 +44,7 @@ namespace LightNode.Server
         readonly AppFunc next;
 
         public LightNodeServerMiddleware(AppFunc next, ILightNodeOptions options)
-            : this(next, options, AppDomain.CurrentDomain.GetAssemblies())
+            : this(next, options, Assembly.GetEntryAssembly().GetReferencedAssemblies().Select(asm => Assembly.Load(asm)).ToArray())
         {
         }
 
@@ -61,7 +61,7 @@ namespace LightNode.Server
             lock (runningHandlerLock)
             {
                 runningHandlers = runningHandlers.SelectMany(g => g, (g, xs) => new { g.Key, xs })
-                    .Concat(new[] { new { Key = options.ServerEngineId, xs = new RegisteredHandlersInfo(options.ServerEngineId, options, registeredHandler) }})
+                    .Concat(new[] { new { Key = options.ServerEngineId, xs = new RegisteredHandlersInfo(options.ServerEngineId, options, registeredHandler) } })
                     .ToLookup(x => x.Key, x => x.xs);
             }
         }
@@ -83,6 +83,8 @@ namespace LightNode.Server
 
 namespace Owin
 {
+    using IAppBuilder = Microsoft.AspNetCore.Builder.IApplicationBuilder;
+    using Microsoft.AspNetCore.Builder;
     public static class AppBuilderLightNodeMiddlewareExtensions
     {
         public static IAppBuilder UseLightNode(this IAppBuilder app)
@@ -92,12 +94,18 @@ namespace Owin
 
         public static IAppBuilder UseLightNode(this IAppBuilder app, ILightNodeOptions options)
         {
-            return app.Use(typeof(LightNodeServerMiddleware), options);
+            return app.UseLightNode(options, Assembly.GetEntryAssembly());
         }
 
         public static IAppBuilder UseLightNode(this IAppBuilder app, ILightNodeOptions options, params Assembly[] hostAssemblies)
         {
-            return app.Use(typeof(LightNodeServerMiddleware), options, hostAssemblies);
+            return app.UseOwin(pipeline =>
+            {
+                pipeline(next =>
+                {
+                    return new LightNodeServerMiddleware(next, options, hostAssemblies).Invoke;
+                });
+            });
         }
     }
 }

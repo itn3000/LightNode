@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "compile": {
+      "include": [
+        "../LightNode.Diagnostics.EventSource/**/*.cs"
+      ],
+      "exclude": [
+        "../LightNode.Diagnostics.EventSource/bin/**/*",
+        "../LightNode.Diagnostics.EventSource/obj/**/*",
+        "../LightNode.Diagnostics.EventSource/Properties/AssemblyInfo.cs"
+      ]
+    },
+    "debugType": "portable"
+  },
+  "dependencies": {
+    "NETStandard.Library": {
+      "version": "1.6.0"
+    },
+    "LightNode.Server.DNC": {
+      "target": "project",
+      "version": "1.0.0-*"
+    }
+  },
+  "frameworks": {
+    "net451": {},
+    "netstandard1.6": {
+      "dependencies": {},
+      "imports": "dnxcore50"
+    }
+  }
+}

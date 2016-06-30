@@ -43,8 +43,8 @@ namespace LightNode.Server
                         return ex.Types.Where(t => t != null);
                     }
                 })
-                .Where(x => typeof(LightNodeContract).IsAssignableFrom(x))
-                .Where(x => !x.IsAbstract);
+                .Where(x => typeof(LightNodeContract).GetTypeInfo().IsAssignableFrom(x))
+                .Where(x => !x.GetTypeInfo().IsAbstract);
 
             Parallel.ForEach(contractTypes, classType =>
             {
@@ -53,7 +53,7 @@ namespace LightNode.Server
                 {
                     throw new InvalidOperationException(string.Format("Type needs parameterless constructor, class:{0}", classType.FullName));
                 }
-                if (classType.GetCustomAttribute<IgnoreOperationAttribute>(true) != null) return; // ignore
+                if (classType.GetTypeInfo().GetCustomAttribute<IgnoreOperationAttribute>(true) != null) return; // ignore
 
                 foreach (var methodInfo in classType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
                 {

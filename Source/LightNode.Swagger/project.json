@@ -1,0 +1,53 @@
+{
+  "version": "1.6.4-*",
+  "buildOptions": {
+    "embed": [
+      "SwaggerUI/**/*"
+    ],
+    "compile": [
+      "**/*.cs",
+      "../LightNode.Server/Utility/*.cs"
+    ],
+    "debugType": "portable",
+    "emitEntryPoint": false
+  },
+  "compile": [
+    "**/*.cs",
+    "../LightNode.Server/Utility/*.cs"
+  ],
+  "dependencies": {
+    "NETStandard.Library": {
+      "type": "platform",
+      "version": "1.6.0"
+    },
+    "LightNode.Server": {
+      "target": "project",
+      "version": "1.6.4-*"
+    },
+    "Newtonsoft.Json": "9.0.1",
+    "Microsoft.AspNetCore.Owin": "1.0.0"
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Linq": "",
+        "System.Threading.Tasks": "",
+        "System.Runtime.Serialization": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      }
+    },
+    "netstandard1.6": {
+      "dependencies": {
+        "System.Threading.Tasks.Parallel": "4.0.1",
+        "System.Runtime.Serialization.Json": "4.0.2"
+      },
+      "imports": "dnxcore50",
+      "buildOptions": {
+        "define": [
+          "DOTNETSTANDARD"
+        ]
+      }
+    }
+  }
+}

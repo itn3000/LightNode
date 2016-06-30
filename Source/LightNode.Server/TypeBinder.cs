@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LightNode.Server
 {
@@ -235,7 +236,7 @@ namespace LightNode.Server
                 : null;
             if (result != null) return result;
 
-            if (targetType.IsEnum)
+            if (targetType.GetTypeInfo().IsEnum)
             {
                 var meta = metaEnumCache.GetOrAdd(targetType, x => new MetaEnum(x));
                 return (enumStrictParse)
@@ -245,7 +246,7 @@ namespace LightNode.Server
             else if (targetType.IsNullable())
             {
                 var genArg = targetType.GetGenericArguments().First();
-                if (genArg.IsEnum)
+                if (genArg.GetTypeInfo().IsEnum)
                 {
                     var meta = metaEnumCache.GetOrAdd(genArg, x => new MetaEnum(x));
                     return (enumStrictParse)
@@ -269,7 +270,7 @@ namespace LightNode.Server
 
             var elemType = targetType.GetElementType();
             if (elemType == null) return null;
-            if (elemType.IsEnum)
+            if (elemType.GetTypeInfo().IsEnum)
             {
                 var tryParse = GetConverter(elemType, enumStrictParse);
 

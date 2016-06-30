@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace LightNode.Swagger
 {
@@ -50,7 +51,7 @@ namespace LightNode.Swagger
                 return Task.FromResult(0);
             }
 
-            var myAssembly = typeof(LightNodeSwaggerMiddleware).Assembly;
+            var myAssembly = typeof(LightNodeSwaggerMiddleware).GetTypeInfo().Assembly;
 
             using (var stream = myAssembly.GetManifestResourceStream(filePath))
             {
@@ -132,7 +133,7 @@ namespace LightNode.Swagger
                             }
 
                             var defaultValue = x.DefaultValue;
-                            if (defaultValue != null && x.ParameterType.IsEnum)
+                            if (defaultValue != null && x.ParameterType.GetTypeInfo().IsEnum)
                             {
                                 defaultValue = (options.IsEmitEnumAsString)
                                     ? defaultValue.ToString()
@@ -144,9 +145,9 @@ namespace LightNode.Swagger
                                 : null;
 
                             object[] enums = null;
-                            if (x.ParameterType.IsEnum || (x.ParameterType.IsArray && x.ParameterType.GetElementType().IsEnum))
+                            if (x.ParameterType.GetTypeInfo().IsEnum || (x.ParameterType.IsArray && x.ParameterType.GetElementType().GetTypeInfo().IsEnum))
                             {
-                                var enumType = (x.ParameterType.IsEnum) ? x.ParameterType : x.ParameterType.GetElementType();
+                                var enumType = (x.ParameterType.GetTypeInfo().IsEnum) ? x.ParameterType : x.ParameterType.GetElementType();
 
                                 var enumValues = Enum.GetValues(enumType).Cast<object>()
                                     .Select(v =>
@@ -364,11 +365,16 @@ namespace LightNode.Swagger
 
 namespace Owin
 {
+    using Microsoft.AspNetCore.Builder;
+    using IAppBuilder = Microsoft.AspNetCore.Builder.IApplicationBuilder;
     public static class AppBuilderLightNodeSwaggerMiddlewareExtensions
     {
         public static IAppBuilder UseLightNodeSwagger(this IAppBuilder app, SwaggerOptions options)
         {
-            return app.Use(typeof(LightNodeSwaggerMiddleware), options);
+            return app.UseOwin(pipeline =>
+            {
+                pipeline(next => new LightNodeSwaggerMiddleware(next, options).Invoke);
+            });
         }
     }
 }

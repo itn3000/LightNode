@@ -59,13 +59,13 @@ namespace LightNode.Server
             this.ReturnType = methodInfo.ReturnType;
 
             this.filters = options.Filters
-                .Concat(classType.GetCustomAttributes<LightNodeFilterAttribute>(true))
+                .Concat(classType.GetTypeInfo().GetCustomAttributes<LightNodeFilterAttribute>(true))
                 .Concat(methodInfo.GetCustomAttributes<LightNodeFilterAttribute>(true))
                 .OrderBy(x => x.Order)
                 .ToArray();
 
             var operationOption = methodInfo.GetCustomAttributes<OperationOptionAttribute>(true).FirstOrDefault()
-                               ?? classType.GetCustomAttributes<OperationOptionAttribute>(true).FirstOrDefault();
+                               ?? classType.GetTypeInfo().GetCustomAttributes<OperationOptionAttribute>(true).FirstOrDefault();
             this.AcceptVerb = (operationOption != null && operationOption.AcceptVerbs != null)
                 ? operationOption.AcceptVerbs.Value
                 : options.DefaultAcceptVerb;
@@ -85,7 +85,7 @@ namespace LightNode.Server
             this.formatterByMediaType = formatterChoiceBase.ToLookup(x => x.MediaType, StringComparer.OrdinalIgnoreCase);
             this.formatterByContentEncoding = formatterChoiceBase.ToLookup(x => x.ContentEncoding, StringComparer.OrdinalIgnoreCase);
 
-            this.AttributeLookup = classType.GetCustomAttributes(true)
+            this.AttributeLookup = classType.GetTypeInfo().GetCustomAttributes(true)
                 .Concat(methodInfo.GetCustomAttributes(true))
                 .Cast<Attribute>()
                 .ToLookup(x => x.GetType());
@@ -101,14 +101,14 @@ namespace LightNode.Server
 
             // prepare lambda parameters
             var envArg = Expression.Parameter(typeof(IDictionary<string, object>), "environment");
-            var envBind = Expression.Bind(typeof(LightNodeContract).GetProperty("Environment"), envArg);
+            var envBind = Expression.Bind(typeof(LightNodeContract).GetTypeInfo().GetProperty("Environment"), envArg);
             var args = Expression.Parameter(typeof(object[]), "args");
             var parameters = methodInfo.GetParameters()
                 .Select((x, i) => Expression.Convert(Expression.ArrayIndex(args, Expression.Constant(i)), x.ParameterType))
                 .ToArray();
 
             // Task or Task<T>
-            if (typeof(Task).IsAssignableFrom(this.ReturnType))
+            if (typeof(Task).GetTypeInfo().IsAssignableFrom(this.ReturnType.GetTypeInfo()))
             {
                 // (object[] args) => new X().M((T1)args[0], (T2)args[1])...
                 var lambda = Expression.Lambda<Func<IDictionary<string, object>, object[], Task>>(
@@ -118,7 +118,7 @@ namespace LightNode.Server
                         parameters),
                     envArg, args);
 
-                if (this.ReturnType.IsGenericType && this.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+                if (this.ReturnType.GetTypeInfo().IsGenericType && this.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     this.handlerBodyType = HandlerBodyType.AsyncFunc;
                     this.methodAsyncFuncBody = lambda.Compile();
@@ -287,7 +287,7 @@ namespace LightNode.Server
                     var rawQ = splitted[1];
                     var q = 1.0;
                     var qSplitted = rawQ.Split('=');
-                    if (qSplitted.Length == 2 && qSplitted[0].Trim().Equals("q", StringComparison.InvariantCultureIgnoreCase) && double.TryParse(qSplitted[1], out q))
+                    if (qSplitted.Length == 2 && qSplitted[0].Trim().Equals("q", StringComparison.OrdinalIgnoreCase) && double.TryParse(qSplitted[1], out q))
                     {
                         list.Add(Tuple.Create(index++, q, name));
                     }
@@ -414,7 +414,7 @@ namespace LightNode.Server
         {
             while (t.GetGenericTypeDefinition() != typeof(Task<>))
             {
-                t = t.BaseType;
+                t = t.GetTypeInfo().BaseType;
             }
             return t;
         }
@@ -439,7 +439,7 @@ namespace LightNode.Server
             IsOptional = parameterInfo.IsOptional;
             ParameterType = parameterInfo.ParameterType;
             ParameterTypeIsArray = parameterInfo.ParameterType.IsArray;
-            ParameterTypeIsClass = parameterInfo.ParameterType.IsClass;
+            ParameterTypeIsClass = parameterInfo.ParameterType.GetTypeInfo().IsClass;
             ParameterTypeIsString = parameterInfo.ParameterType == typeof(string);
             ParameterTypeIsNullable = parameterInfo.ParameterType.IsNullable();
         }

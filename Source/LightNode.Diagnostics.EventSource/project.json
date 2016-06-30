@@ -1,0 +1,24 @@
+{
+  "version": "1.6.4-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": false
+  },
+  "dependencies": {
+    "NETStandard.Library": {
+      "type": "platform",
+      "version": "1.6.0"
+    },
+    "LightNode.Server": {
+      "target": "project",
+      "version": "1.6.4-*"
+    }
+  },
+  "frameworks": {
+    "net451": {},
+    "netstandard1.6": {
+      "dependencies": {},
+      "imports": "dnxcore50"
+    }
+  }
+}

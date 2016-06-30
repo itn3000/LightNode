@@ -1,0 +1,9 @@
+{
+  "sources": [
+    "Source/LightNode.Core",
+    "Source/LightNode.Diagnostics.EventSource",
+    "Source/LightNode.Server",
+    "Source/LightNode.Swagger"
+  ],
+  "projects": [ "Source" ]
+}

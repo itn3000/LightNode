@@ -1,0 +1,32 @@
+{
+  "version": "1.6.4-*",
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": false
+  },
+  "dependencies": {
+    "NETStandard.Library": {
+      "type": "platform",
+      "version":"1.6.0"
+    }
+  },
+  "frameworks": {
+    "netstandard1.1": {
+      "dependencies": {
+        "System.Xml.XmlSerializer":"4.0.11",
+        "System.Runtime.Serialization.Json":"4.0.2",
+        "System.Runtime.Serialization.Xml": "4.1.1"
+      }
+    },
+    "netstandard1.6": {
+      "dependencies": {
+        "System.Xml.XmlSerializer": "4.0.11",
+        "System.Runtime.Serialization.Xml": "4.1.1",
+        "System.Runtime.Serialization.Json": "4.0.2"
+      },
+      "imports": [
+        "dnxcore50"
+      ]
+    }
+  }
+}

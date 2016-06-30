@@ -124,7 +124,7 @@ namespace LightNode.Server
         {
             this.baseStream.Write(buffer, offset, count);
         }
-
+#if !DOTNETSTANDARD
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
             return this.baseStream.BeginRead(buffer, offset, count, callback, state);
@@ -144,6 +144,7 @@ namespace LightNode.Server
         {
             this.baseStream.EndWrite(asyncResult);
         }
+#endif
 
         public override int ReadByte()
         {
@@ -179,13 +180,14 @@ namespace LightNode.Server
         {
             return this.baseStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
-
+#if !DOTNETSTANDARD
         // protect closing
 
         public override void Close()
         {
 
         }
+#endif
 
 
         protected override void Dispose(bool disposing)

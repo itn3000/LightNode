@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LightNode.Server
 {
@@ -45,7 +46,7 @@ namespace LightNode.Server
 
         internal MetaEnum(Type enumType)
         {
-            if (!enumType.IsEnum) throw new ArgumentException("ArgumentType is not Enum:" + enumType.FullName);
+            if (!enumType.GetTypeInfo().IsEnum) throw new ArgumentException("ArgumentType is not Enum:" + enumType.FullName);
 
             EnumType = enumType;
 
@@ -58,12 +59,12 @@ namespace LightNode.Server
             byFieldNameIgnoreCase = Fields.ToLookup(x => x.Key, StringComparer.OrdinalIgnoreCase);
             byValue = Fields.ToDictionary(x => x.Value);
 
-            var underlyingType = enumType.GetEnumUnderlyingType();
+            var underlyingType = enumType.GetTypeInfo().GetEnumUnderlyingType();
             EnumUnderlyingType = underlyingType;
             byUnderlyingType = Fields.ToDictionary(x => Convert.ChangeType(x.Value, underlyingType));
 
             // bit flags
-            IsBitFlag = enumType.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
+            IsBitFlag = enumType.GetTypeInfo().GetCustomAttributes(typeof(FlagsAttribute), false).Any();
 
             // bit flag function, Code is inspired from UnconstrainedMelody by Jon Skeet.
             var objectX = Expression.Parameter(typeof(object), "x");
